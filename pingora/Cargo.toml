@@ -1,0 +1,15 @@
+[package]
+name = "pingora"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "0.1.42"
+log = "0.4"
+clap = { version = "3.2.25", features = ["derive"] }
+pingora-core = { version = "0.3.0", default-features = false }
+pingora-proxy = { version = "0.3.0" }
+pingora-load-balancing = { version = "0.3.0" }
+pingora-http = { version = "0.3.0"}

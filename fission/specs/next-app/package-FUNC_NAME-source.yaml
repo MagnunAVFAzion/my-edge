@@ -1,0 +1,25 @@
+include:
+- FUNC_NAME-source.zip
+kind: ArchiveUploadSpec
+name: FUNC_NAME-source-zip
+
+---
+apiVersion: fission.io/v1
+kind: Package
+metadata:
+  creationTimestamp: null
+  name: FUNC_NAME-source
+  namespace: default
+spec:
+  deployment:
+    checksum: {}
+    type: url
+    url: archive://FUNC_NAME-source-zip
+  environment:
+    name: nodejs
+    namespace: default
+  source:
+    checksum: {}
+status:
+  buildstatus: succeeded
+  lastUpdateTimestamp: "2021-07-28T06:42:55Z"

@@ -14,15 +14,20 @@ func clean() error {
 		panic(fmt.Errorf("error in clean: %w", err))
 	}
 
+	err = os.Remove("./entry.js")
+	if err != nil {
+		panic(fmt.Errorf("error in clean: %w", err))
+	}
+
 	return nil
 }
 
 func main() {
 	clean()
 
-	err := build.RunVercelBuild()
+	err := build.Exec()
 	if err != nil {
-		panic(fmt.Errorf("error running vercel build: %w", err))
+		panic(fmt.Errorf("error running build: %w", err))
 	}
 
 	err = pack.PackProject()
@@ -30,7 +35,10 @@ func main() {
 		panic(fmt.Errorf("error packing project: %w", err))
 	}
 
-	send.SendProject()
+	err = send.SendProject()
+	if err != nil {
+		panic(fmt.Errorf("error sending project: %w", err))
+	}
 
-	fmt.Println("Done!")
+	fmt.Println("\nSuccess!")
 }

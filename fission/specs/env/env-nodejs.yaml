@@ -11,5 +11,5 @@ spec:
   poolsize: 3
   resources: {}
   runtime:
-    image: fission/node-env-20
+    image: ghcr.io/fission/node-env-22:latest
   version: 2

@@ -3,11 +3,11 @@ package pack
 import (
 	"cli/helpers"
 	"cli/models"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/google/uuid"
 	cp "github.com/otiai10/copy"
 )
 
@@ -42,24 +42,39 @@ func getFunctionsDirs(srcDir string) ([]string, error) {
 	return directories, nil
 }
 
-func zipFunctions() error {
-	fmt.Println("Zipping functions ...")
+func zipProject(manifest models.Manifest) error {
+	fmt.Println("\n* Zipping project ...")
+	projectStateIdentifier := manifest.GetProjectStateIdentifier()
+	outZipFile := fmt.Sprintf("%s/%s-source.zip", OUT_DIR, projectStateIdentifier)
+	filesAndDirs := ".next/ entry.js middleware.js next.config.js node_modules/ package-lock.json package.json pages/ public/ styles/"
+	command := fmt.Sprintf("zip -q -r %s %s", outZipFile, filesAndDirs)
 
-	helpers.CreateDirIfNotExists(ZIPPED_FUNCTIONS_DIR)
+	res, err := helpers.RunShellCommand(command)
+	if err != nil {
+		return fmt.Errorf("error zipping project: %w", err)
+	}
+	fmt.Println(res)
+	fmt.Println("zipped!")
 
+	return nil
+}
+
+func mapRoutes(routes map[string]string) error {
 	directories, err := getFunctionsDirs(VERCEL_OUT_FUNC_DIR)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Dirs: %w", directories)
+
 	for _, dir := range directories {
-		zipFilePath := filepath.Join(ZIPPED_FUNCTIONS_DIR, filepath.Base(dir)+".zip")
-		err := helpers.ZipDir(dir, zipFilePath)
+		vercelConfigFilePath := filepath.Join(dir, ".vc-config.json")
+		vercelConfigContent, err := os.ReadFile(vercelConfigFilePath)
 		if err != nil {
-			fmt.Println("Error zipping directory:", err)
-		} else {
-			fmt.Println("Zipped directory:", dir, "->", zipFilePath)
+			return fmt.Errorf("error reading vercel config file: %w", err)
 		}
+
+		var vercelConfig models.VercelConfig
+		json.Unmarshal(vercelConfigContent, vercelConfig)
+
 	}
 
 	return nil
@@ -68,42 +83,25 @@ func zipFunctions() error {
 func PackProject() error {
 	fmt.Println("\n* Packing the project ...")
 
-	helpers.CreateDirIfNotExists(OUT_DIR)
-
-	project := models.Project{
-		Id:             uuid.New(),
-		ClientId:       "0001a",
-		Name:           "nextjs-hybrid-example",
-		CurrentVersion: helpers.GetCurrentUnixTimestamp(),
-	}
-
-	routes := map[string]string{
-		"/_next/static/": "s3",
-		"/_next/data/":   "s3",
-		".(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4|json|xml|html)$": "s3",
-		"/ssr-node": "node",
-		"/ssr-edge": "edge",
+	var manifest models.Manifest
+	err := manifest.ReadManifestFromFile(MANIFEST_PATH)
+	if err != nil {
+		return fmt.Errorf("error reading manifest file: %w", err)
 	}
 
 	// create functions zip
-	err := zipFunctions()
-	if err != nil {
-		return err
-	}
-
-	// create manifest
-	manifest := models.Manifest{
-		Project: project,
-		Routes:  routes,
-		Cache:   map[string]string{},
-	}
-	err = manifest.Generate()
+	err = zipProject(manifest)
 	if err != nil {
 		return err
 	}
 
 	// copy assets to send
+	fmt.Println("\n* Copying assets ...")
 	err = cp.Copy(VERCEL_OUT_ASSETS_DIR, STORAGE_ASSETS_DIR)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Done!")
 
 	return nil
 }

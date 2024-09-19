@@ -10,8 +10,34 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
+
+func RenameFile(oldName, newName string) error {
+	err := os.Rename(oldName, newName)
+	if err != nil {
+		return fmt.Errorf("error renaming file: %w", err)
+	}
+
+	return nil
+}
+
+func ReplaceStrInFile(filePath, oldPattern, newPattern string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("error reading file: %w", err)
+	}
+
+	newContent := strings.ReplaceAll(string(content), oldPattern, newPattern)
+
+	err = os.WriteFile(filePath, []byte(newContent), 0644)
+	if err != nil {
+		return fmt.Errorf("error writing file: %w", err)
+	}
+
+	return nil
+}
 
 func CreateDirIfNotExists(dirPath string) error {
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {

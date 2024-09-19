@@ -1,5 +1,5 @@
 include:
-- FUNC_NAME-source.zip
+- ./out/FUNC_NAME-source.zip
 kind: ArchiveUploadSpec
 name: FUNC_NAME-source-zip
 

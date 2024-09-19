@@ -21,7 +21,7 @@ spec:
   functionTimeout: 60
   idletimeout: 120
   package:
-    functionName: app
+    functionName: entry
     packageref:
       name: FUNC_NAME-source
       namespace: default

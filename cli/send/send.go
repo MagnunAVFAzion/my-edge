@@ -55,7 +55,7 @@ func SendProject() error {
 	fmt.Println("\n* Sending project ...")
 
 	var manifest models.Manifest
-	err := manifest.ReadManifestFromFile(MANIFEST_PATH)
+	err := manifest.ReadFromFile(MANIFEST_PATH)
 	if err != nil {
 		return fmt.Errorf("error reading manifest file: %w", err)
 	}

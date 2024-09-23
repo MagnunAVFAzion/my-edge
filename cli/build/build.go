@@ -127,7 +127,7 @@ func createAndSaveManifest() (models.Manifest, error) {
 		Routes:  routes,
 		Cache:   map[string]string{},
 	}
-	err := manifest.Generate()
+	err := manifest.Save()
 	if err != nil {
 		return manifest, err
 	}

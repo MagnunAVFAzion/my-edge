@@ -3,10 +3,10 @@ package pack
 import (
 	"cli/helpers"
 	"cli/models"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	cp "github.com/otiai10/copy"
 )
@@ -59,22 +59,35 @@ func zipProject(manifest models.Manifest) error {
 	return nil
 }
 
-func mapRoutes(routes map[string]string) error {
-	directories, err := getFunctionsDirs(VERCEL_OUT_FUNC_DIR)
+func mapRoutes(manifest models.Manifest) error {
+	fmt.Println("\n* Mapping app routes ...")
+
+	vercelConfigFiles, err := helpers.FindFileInDir(VERCEL_OUT_FUNC_DIR, ".vc-config.json")
 	if err != nil {
 		return err
 	}
 
-	for _, dir := range directories {
-		vercelConfigFilePath := filepath.Join(dir, ".vc-config.json")
-		vercelConfigContent, err := os.ReadFile(vercelConfigFilePath)
+	for _, configPath := range vercelConfigFiles {
+		functionDir := filepath.Dir(configPath)
+		relPath, err := filepath.Rel(VERCEL_OUT_FUNC_DIR, functionDir)
 		if err != nil {
-			return fmt.Errorf("error reading vercel config file: %w", err)
+			return err
 		}
+		functionRoute := strings.TrimSuffix(relPath, ".func")
+		functionRoute = "/" + functionRoute
 
 		var vercelConfig models.VercelConfig
-		json.Unmarshal(vercelConfigContent, vercelConfig)
+		err = vercelConfig.ReadFromFile(configPath)
+		if err != nil {
+			return err
+		}
 
+		manifest.Routes[functionRoute] = vercelConfig.Runtime
+	}
+
+	err = manifest.Save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -84,9 +97,14 @@ func PackProject() error {
 	fmt.Println("\n* Packing the project ...")
 
 	var manifest models.Manifest
-	err := manifest.ReadManifestFromFile(MANIFEST_PATH)
+	err := manifest.ReadFromFile(MANIFEST_PATH)
 	if err != nil {
 		return fmt.Errorf("error reading manifest file: %w", err)
+	}
+
+	err = mapRoutes(manifest)
+	if err != nil {
+		return err
 	}
 
 	// create functions zip

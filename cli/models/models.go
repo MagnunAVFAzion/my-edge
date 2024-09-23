@@ -22,8 +22,8 @@ type Manifest struct {
 	Cache   map[string]string `json:"cache"`
 }
 
-func (m *Manifest) Generate() error {
-	fmt.Println("\n* Generating manifest ...")
+func (m *Manifest) Save() error {
+	fmt.Println("\n* Saving manifest ...")
 
 	jsonData, err := json.MarshalIndent(m, "", " ")
 	if err != nil {
@@ -35,7 +35,7 @@ func (m *Manifest) Generate() error {
 		return fmt.Errorf("error writing JSON file: %w", err)
 	}
 
-	fmt.Println("Manifest created!")
+	fmt.Println("Manifest saved!")
 
 	return nil
 }
@@ -44,7 +44,7 @@ func (m *Manifest) GetProjectStateIdentifier() string {
 	return fmt.Sprintf("%s-%s-%s", m.Project.ClientId, m.Project.Id, m.Project.CurrentVersion)
 }
 
-func (m *Manifest) ReadManifestFromFile(path string) error {
+func (m *Manifest) ReadFromFile(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("error opening file: %w", err)
@@ -68,4 +68,24 @@ func (m *Manifest) ReadManifestFromFile(path string) error {
 type VercelConfig struct {
 	Runtime string `json:"runtime"`
 	Name    string `json:"name"`
+}
+
+func (v *VercelConfig) ReadFromFile(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening file: %w", err)
+	}
+	defer file.Close()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("error reading file content: %w", err)
+	}
+
+	err = json.Unmarshal(content, v)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling json: %w", err)
+	}
+
+	return nil
 }

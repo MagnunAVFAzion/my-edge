@@ -165,3 +165,21 @@ func GetCurrentUnixTimestamp() string {
 
 	return timestampString
 }
+
+func FindFileInDir(rootDir, fileName string) ([]string, error) {
+	var foundPaths []string
+
+	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() && info.Name() == fileName {
+			foundPaths = append(foundPaths, path)
+		}
+
+		return nil
+	})
+
+	return foundPaths, err
+}

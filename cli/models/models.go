@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const OUT_DIR string = "./out"
+const OUT_DIR string = "out"
 const MANIFEST_PATH string = OUT_DIR + "/manifest.json"
 
 type Project struct {

@@ -11,11 +11,11 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-const OUT_DIR string = "./out"
+const OUT_DIR string = "out"
 const MANIFEST_PATH string = OUT_DIR + "/manifest.json"
 const ZIPPED_FUNCTIONS_DIR = OUT_DIR + "/functions"
 const STORAGE_ASSETS_DIR = OUT_DIR + "/storage"
-const VERCEL_BUILD_OUTPUT_DIR string = "./.vercel/output"
+const VERCEL_BUILD_OUTPUT_DIR string = ".vercel/output"
 const VERCEL_OUT_FUNC_DIR string = VERCEL_BUILD_OUTPUT_DIR + "/functions"
 const VERCEL_OUT_ASSETS_DIR string = VERCEL_BUILD_OUTPUT_DIR + "/static"
 

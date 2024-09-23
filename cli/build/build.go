@@ -9,7 +9,7 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-const OUT_DIR string = "./out"
+const OUT_DIR string = "out"
 const DEFAULT_CONFIG string = "{\"projectId\":\"_\",\"orgId\":\"_\",\"settings\":{}}"
 
 func runVercelBuild() error {
@@ -97,7 +97,7 @@ func copyAppEntryTemplate() error {
 	fmt.Println("\n* Copying app entry template ...")
 	appEntryTemplatePath := os.Getenv("FISSION_FILES_PATH") + "/templates/next.js"
 
-	err := cp.Copy(appEntryTemplatePath, "./entry.js")
+	err := cp.Copy(appEntryTemplatePath, "entry.js")
 	if err != nil {
 		return fmt.Errorf("error copying app template: %w", err)
 	}

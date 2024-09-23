@@ -9,12 +9,12 @@ import (
 )
 
 func clean() error {
-	err := os.RemoveAll("./out")
+	err := os.RemoveAll("out")
 	if err != nil {
 		panic(fmt.Errorf("error in clean: %w", err))
 	}
 
-	err = os.Remove("./entry.js")
+	err = os.Remove("entry.js")
 	if err != nil {
 		panic(fmt.Errorf("error in clean: %w", err))
 	}

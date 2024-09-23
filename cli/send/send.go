@@ -9,7 +9,7 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-const OUT_DIR string = "./out"
+const OUT_DIR string = "out"
 const MANIFEST_PATH string = OUT_DIR + "/manifest.json"
 const STORAGE_ASSETS_DIR = OUT_DIR + "/storage"
 
@@ -17,7 +17,7 @@ func sendManifestToPingora() error {
 	fmt.Println("\n* Sending manifest ...")
 
 	pingoraPath := os.Getenv("PINGORA_PATH")
-	destFilePath := fmt.Sprintf("%s/manifest.json", pingoraPath)
+	destFilePath := fmt.Sprintf("%s/artifacts/manifest.json", pingoraPath)
 
 	err := cp.Copy(MANIFEST_PATH, destFilePath)
 	if err != nil {
@@ -47,7 +47,14 @@ func deployFissionFunction(manifest models.Manifest) error {
 	return nil
 }
 
-func sendAssetsToS3() error {
+func sendAssetsToS3(projectId string) error {
+	minioUrl := os.Getenv("MINIO_URL")
+	azionBucket := os.Getenv("AZION_BUCKET")
+	err := UploadDirFiles(STORAGE_ASSETS_DIR, minioUrl, azionBucket, projectId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -70,7 +77,8 @@ func SendProject() error {
 		return err
 	}
 
-	err = sendAssetsToS3()
+	projectId := manifest.GetProjectStateIdentifier()
+	err = sendAssetsToS3(projectId)
 	if err != nil {
 		return err
 	}
